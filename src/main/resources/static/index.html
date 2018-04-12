@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="google-signin-client_id" content="379691979290-s80the6km4bu5uqkmdluje27qp0la9tp.apps.googleusercontent.com">
     <link rel="icon" href="../../favicon.ico">
-
+    
     <title>BrewBase</title>
 
     <!-- Bootstrap core CSS -->
@@ -30,7 +31,9 @@
                 <a class="nav-link active" href="#">Home</a>
                 <a class="nav-link" href="#">Add Data</a>
                 <a class="nav-link" href="/registration">Register</a>
+                <div id="my-signin2" class="btn btn-primary btn-block"></div>
               </nav>
+                
             </div>
           </div>
 
@@ -42,6 +45,34 @@
             <p class="lead">
               <a href="#" class="btn btn-lg btn-secondary">Learn more</a>
             </p>
+            <script>
+              function onSuccess(googleUser) {
+                console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+                onSignIn(googleUser)
+              }
+              function onFailure(error) {
+                console.log(error);
+              }
+              function renderButton() {
+                gapi.signin2.render('my-signin2', {
+                  'scope': 'profile email',
+                  'width': 240,
+                  'height': 50,
+                  'longtitle': true,
+                  'theme': 'dark',
+                  'onsuccess': onSuccess,
+                  'onfailure': onFailure
+                });
+              }
+              function onSignIn(googleUser) {
+                var profile = googleUser.getBasicProfile();
+                console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                console.log('Name: ' + profile.getName());
+                console.log('Image URL: ' + profile.getImageUrl());
+                console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+              }
+            </script>
+            
           </div>
 
           <div class="mastfoot">
@@ -65,5 +96,7 @@
     <script src="../../dist/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    <!-- Google sign-in-->
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
   </body>
 </html>
