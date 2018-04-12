@@ -54,7 +54,6 @@
           var token = result.credential.accessToken;
           // The signed-in user info.
           var user = result.user;
-          // ...
         }).catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;
@@ -63,10 +62,32 @@
           var email = error.email;
           // The firebase.auth.AuthCredential type that was used.
           var credential = error.credential;
-          // ...
         });
     </script>
-    
+    <script>
+        function getPopMovie() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "https://api.themoviedb.org/3/movie/popular?api_key=1aaf71958b7db19be46d483fd755a944&language=en-US&page=1", false);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send();
+            var response = JSON.parse(xhttp.responseText);
+            // Will get the current most popular movie name
+            var popMovieTitle = response["results"][0].title;
+            // Will get the current most popular movie rating
+            var popMovieRating = response["results"][0].vote_average;
+            var movieString = "Most popular movie: " + popMovieTitle + "\nAverage vote rating: " + popMovieRating;
+            console.log("Movie response: " + movieString);
+        };
+        function getDrink(){
+            addb.init({
+                appId: 16897
+            });    
+            var taste = '' + document.getElementById('movie').value;
+            console.log("Taste : " + taste);
+            var drinkDetails = addb.tastes().load(taste, function(shake) { });
+            console.log(drinkDetails);
+        };
+    </script>
     
     <div class="site-wrapper">
 
@@ -88,25 +109,21 @@
 
           <div class="inner cover">
             <h1 class="cover-heading">Welcome to BrewBase.</h1>
-            <input type="text" class="form-control" id="movie">
-            <input type="submit" class="btn btn-info" value="Search">
+            <input type="text" class="form-control" value ="absolut-cosmopolitan" id="movie">
+            <input type="submit" class="btn btn-info" value="Search" onClick="getPopMovie();getDrink()">
             <p class="lead">BrewBase is your premier resource for choosing the best drink to pair with your movie. Just enter a movie title and BrewBase will use the power of data along with your personal preferences to provide drink recommendations.</p>
             <p class="lead">
               <a href="#" class="btn btn-lg btn-secondary">Learn more</a>
             </p>
-            
           </div>
-
+            
           <div class="mastfoot">
             <div class="inner">
-              
             </div>
           </div>
-
+            
         </div>
-
       </div>
-
     </div>
 
     <!-- Bootstrap core JavaScript
@@ -129,5 +146,9 @@
     <!-- Main FireBase script-->
     <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
     
+    <!-- absolutdrinks api source -->
+    <script src="http://assets.absolutdrinks.com/api/addb-0.5.2.js" type="text/javascript"></script>
+
+
   </body>
 </html>
