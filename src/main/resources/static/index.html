@@ -1,163 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="google-signin-client_id" content="379691979290-s80the6km4bu5uqkmdluje27qp0la9tp.apps.googleusercontent.com">
-    <link rel="icon" href="../../favicon.ico">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="google-signin-client_id" content="379691979290-s80the6km4bu5uqkmdluje27qp0la9tp.apps.googleusercontent.com">
+        <title>BrewBase</title>
+        <meta name="description" content=""/>
+        <meta name="viewport" content="width=device-width"/>
+        <base href="/"/>
+        <link rel="icon" href="../../favicon.ico"></link>
+        <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+        <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/webjars/font-awesome/css/font-awesome.min.css"></link>
+        <link href="../../cover.css" rel="stylesheet"></link>
+    </head>
+    <body>
+        <div id="my-signin2"></div>
+        <script>
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyDO9wyRXwoy-hYSnzNrsSz91ca1gB5p0Qc",
+                authDomain: "ist411-1522363488845.firebaseapp.com",
+                databaseURL: "https://ist411-1522363488845.firebaseio.com",
+                projectId: "ist411-1522363488845",
+                storageBucket: "ist411-1522363488845.appspot.com",
+                messagingSenderId: "379691979290"
+            };
+            firebase.initializeApp(config);
+            function onSuccess(googleUser) {
+                console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+            }
+            function onFailure(error) {
+                console.log(error);
+            }
+            function renderButton() {
+                gapi.signin2.render('my-signin2', {
+                    'scope': 'profile email',
+                    'width': 240,
+                    'height': 50,
+                    'longtitle': true,
+                    'theme': 'dark',
+                    'onsuccess': onSuccess,
+                    'onfailure': onFailure
+                });
+            }
 
-    <title>BrewBase</title>
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(function (result) {
+                // This gives you a Google Access Token. You can use it to access the Google API.
+                var token = result.credential.accessToken;
+                // The signed-in user info.
+                var user = result.user;
+            }).catch(function (error) {
+                // Handle Errors here.
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                // The email of the user's account used.
+                var email = error.email;
+                // The firebase.auth.AuthCredential type that was used.
+                var credential = error.credential;
+            });
+        </script>
+        <script>
+            function getSuggestions() {
+                // Gets the genre of the movie inputted by the user
+                // Returns "Genre not found" if input is invalid
+                var movie = document.getElementById('movie').value;
+                var uri = "https://api.themoviedb.org/3/search/movie?api_key=1aaf71958b7db19be46d483fd755a944&language=en-US&query=" + movie + "&page=1";
+                var url = encodeURI(uri);
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", url, false);
+                xhttp.send();
+                var response = JSON.parse(xhttp.responseText);
+                var movie_genre_ID = response["results"][0]["genre_ids"][0];
+                xhttp.abort();        
+                var xhttp2 = new XMLHttpRequest();
+                xhttp2.open("GET", "https://api.themoviedb.org/3/genre/movie/list?api_key=1aaf71958b7db19be46d483fd755a944&language=en-US", false);
+                xhttp2.send();
+                var genre_name_response = JSON.parse(xhttp2.responseText);
+                var genre_list = genre_name_response["genres"];
+                var movie_genre = "Genre not found";
+                for (i = 0; i < genre_list.length; i++) {
+                    if (genre_list[i]["id"] == movie_genre_ID) {
+                        movie_genre = genre_list[i]["name"];
+                    }
+                }
+                // A list of all genres registered on TheMovieDB
+                var all_genres = [
+                    "Action"
+                            , "Adventure"
+                            , "Animation"
+                            , "Comedy"
+                            , "Crime"
+                            , "Documentary"
+                            , "Drama"
+                            , "Family"
+                            , "Fantasy"
+                            , "History"
+                            , "Horror"
+                            , "Music"
+                            , "Mystery"
+                            , "Romance"
+                            , "Science Fiction"
+                            , "TV Movie"
+                            , "Thriller"
+                            , "War"
+                            , "Western"
+                ];
+                // Assigns a drink type to each movie genre
+                var drink_type = "Ordinary_Drink";
+                switch (movie_genre) {
+                    case "Action":
+                    case "Adventure":
+                        drink_type = "Cocktail";
+                        break;
+                    case "Animation":
+                    case "Comedy":
+                    case "Family":
+                    case "TV Movie":
+                        drink_type = "Punch / Party Drink";
+                        break;
+                    case "Crime":
+                    case "Thriller":
+                    case "Horror":
+                        drink_type = "Shot";
+                        break;
+                    case "Documentary":
+                    case "Drama":
+                        drink_type = "Ordinary_Drink";
+                        break;
+                    case "Fantasy":
+                    case "Mystery":
+                    case "Science Fiction":
+                        drink_type = "Milk / Float / Shake";
+                        break;
+                    case "War":
+                    case "Western":
+                        drink_type = "Beer";
+                        break;
+                    case "Music":
+                    case "Romance":
+                        drink_type = "Homemade Liqueur";
+                }
+                // Finds a drink of the appropriate drink type for the given movie and writes to a label with details
+                var new_xml = new XMLHttpRequest();
+                new_xml.open("GET", "https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=" + drink_type, false);
+                new_xml.send();
+                var drink_response = JSON.parse(new_xml.responseText);
+                var drink = drink_response["drinks"][0]["strDrink"];
+                var drink_pic = drink_response["drinks"][0]["strDrinkThumb"];
+                var drink_ID = drink_response["drinks"][0]["idDrink"];
+                var intro = "" + movie + " is in the " + movie_genre.toLowerCase() + " genre. As such, it will pair nicely with a(n) ";
+                if("Genre not found" == movie_genre){
+                    intro = "" + movie + " has no genre in the database. As such, it will pair nicely with a(n) ";
+                }
+                document.getElementById('lblDrink').innerHTML = intro + drink_type.toLowerCase().replace(/_/g,' ') + ". We suggest the " + drink + ". For details on how to prepare this drink please visit " + "this entry on The Cocktail DB".link("https://www.thecocktaildb.com/drink.php?c=" + drink_ID) + ".";
+                document.getElementById('img').src = "" + drink_pic;
+            };
+        </script>
 
-    <!-- Bootstrap core CSS -->
-    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+        <div class="site-wrapper">
 
-    <!-- Custom styles for this template -->
-    <link href="cover.css" rel="stylesheet">
-  </head>
+            <div class="site-wrapper-inner">
 
-  <body>
-    <div id="my-signin2"></div>
-    <script>
-        // Initialize Firebase
-        var config = {
-          apiKey: "AIzaSyDO9wyRXwoy-hYSnzNrsSz91ca1gB5p0Qc",
-          authDomain: "ist411-1522363488845.firebaseapp.com",
-          databaseURL: "https://ist411-1522363488845.firebaseio.com",
-          projectId: "ist411-1522363488845",
-          storageBucket: "ist411-1522363488845.appspot.com",
-          messagingSenderId: "379691979290"
-        };
-        firebase.initializeApp(config);
-        function onSuccess(googleUser) {
-          console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-        }
-        function onFailure(error) {
-          console.log(error);
-        }
-        function renderButton() {
-          gapi.signin2.render('my-signin2', {
-            'scope': 'profile email',
-            'width': 240,
-            'height': 50,
-            'longtitle': true,
-            'theme': 'dark',
-            'onsuccess': onSuccess,
-            'onfailure': onFailure
-          });
-        }
-        
-        var provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider).then(function(result) {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          var token = result.credential.accessToken;
-          // The signed-in user info.
-          var user = result.user;
-        }).catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // The email of the user's account used.
-          var email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          var credential = error.credential;
-        });
-    </script>
-    <script>
-        function getPopMovie() {
-            var xhttp = new XMLHttpRequest();
-            xhttp.open("GET", "https://api.themoviedb.org/3/movie/popular?api_key=1aaf71958b7db19be46d483fd755a944&language=en-US&page=1", false);
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.send();
-            var response = JSON.parse(xhttp.responseText);
-            // Will get the current most popular movie name
-            var popMovieTitle = response["results"][0].title;
-            // Will get the current most popular movie rating
-            var popMovieRating = response["results"][0].vote_average;
-            var movieString = "Most popular movie: " + popMovieTitle + "\nAverage vote rating: " + popMovieRating;
-            console.log("Movie response: " + movieString);
-            document.getElementById('lblMovie').innerHTML = movieString;
-        };
-        function getDrink(){
-            var drink = document.getElementById('drink').value;
-            var url = 'https://www.thecocktaildb.com/api/json/v1/1/search.php?s=' + drink;
-            var xhttp = new XMLHttpRequest();
-            xhttp.open("GET", url, true);
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.send();
-            var response = JSON.parse(xhttp.responseText);
-            document.getElementById('lblDrink').innerHTML = "Drink data for " + drink + " : " + response;
-            console.log("Drink response : " + response);
-        };
-    </script>
-    
-    <div class="site-wrapper">
+                <div class="cover-container">
 
-      <div class="site-wrapper-inner">
+                    <div class="masthead clearfix">
+                        <div class="inner">
+                            <nav class="nav nav-masthead">
+                                <a class="nav-link active" href="#">Home</a>
+                                <a class="nav-link" href="/add-data">Add Data</a>
+                                <a class="nav-link" href="/registration">Register</a>
+                            </nav>
+                        </div>
+                    </div>
 
-        <div class="cover-container">
+                    <div class="inner cover">
+                        <h1 class="cover-heading">Welcome to BrewBase.</h1>
+                        <p class="lead"></p>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Enter a movie here..." id="movie">
+                            <span class="input-group-btn">
+                                <button class="btn btn-secondary" type="button" onClick="getSuggestions();">Go!</button>
+                            </span>
+                        </div>
+                        <p class="lead"></p>
+                        <p class="lead">
+                            <a href="#" class="btn btn-lg btn-secondary">Learn more</a>
+                        </p>
+                        <p class="lead">
+                            <img id="img" class="img-thumbnail" />
+                        </p>
+                        <p>
+                            <label id="lblDrink"></label>
+                        </p>
+                    </div>
 
-          <div class="masthead clearfix">
-            <div class="inner">
-              <nav class="nav nav-masthead">
-                <a class="nav-link active" href="#">Home</a>
-                <a class="nav-link" href="/add-data">Add Data</a>
-                <a class="nav-link" href="/registration">Register</a>
-                <div id="my-signin2" class="btn btn-primary btn-block"></div>
-              </nav>
-                
+                </div>
             </div>
-          </div>
-
-          <div class="inner cover">
-            <h1 class="cover-heading">Welcome to BrewBase.</h1>
-            <input type="text" class="form-control" value ="absolut-cosmopolitan" id="drink">
-            <input type="submit" class="btn btn-info" value="Search" onClick="getPopMovie();getDrink()">
-            <p class="lead">BrewBase is your premier resource for choosing the best drink to pair with your movie. Just enter a movie title and BrewBase will use the power of data along with your personal preferences to provide drink recommendations.</p>
-            <p class="lead">
-              <a href="#" class="btn btn-lg btn-secondary">Learn more</a>
-            </p>
-            <p>
-                <label id="lblMovie"></label>
-            </p>
-            <p>
-                <label id="lblDrink"></label>
-            </p>
-          </div>
-            
-          <div class="mastfoot">
-            <div class="inner">
-            </div>
-          </div>
-            
         </div>
-      </div>
-    </div>
+        <!-- Google sign-in-->
+        <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+        <!-- Firebase imports -->
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-firestore.js"></script>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
-    <!-- Google sign-in-->
-    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
-    <!-- Firebase imports -->
-    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-firestore.js"></script>
-    
-    <!-- Main FireBase script-->
-    <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
-    
-    <!-- absolutdrinks api source -->
-    <script src="http://assets.absolutdrinks.com/api/addb-0.5.2.js" type="text/javascript"></script>
+        <!-- Main FireBase script-->
+        <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
 
-
-  </body>
+        <!-- absolutdrinks api source -->
+        <script src="http://assets.absolutdrinks.com/api/addb-0.5.2.js" type="text/javascript"></script>
+    </body>
 </html>
