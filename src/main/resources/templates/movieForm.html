@@ -31,9 +31,11 @@
             firebase.initializeApp(config);
             // Get a reference to the database service
             var database = firebase.database();
+            newUser = "";
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
-                    
+                    console.log("User = " + user.uid);
+                    newUser = user.uid;
                 } else {
                     function onSuccess(googleUser) {
                         console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
@@ -84,10 +86,11 @@
                 };
 
                 // Post the data
-                console.log("Ref = " + database.ref());
-                console.log("Data = " + postData);
-                var databaseRef = database.ref('users/user_uid');
-                databaseRef.set(postData);
+                var databaseRef = database.ref().child('users').child('uid');
+                var newPostKey = databaseRef.push().key;
+                var updates = {};
+                updates['/users/uid-' + newUser + "/postkey" + newPostKey] = postData;
+                return database.ref().update(updates);
             }
         </script>
         <div class="site-wrapper">
