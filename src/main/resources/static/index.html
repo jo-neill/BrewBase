@@ -148,14 +148,16 @@
                 new_xml.open("GET", "https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=" + drink_type, false);
                 new_xml.send();
                 var drink_response = JSON.parse(new_xml.responseText);
-                var drink = drink_response["drinks"][0]["strDrink"];
-                var drink_pic = drink_response["drinks"][0]["strDrinkThumb"];
-                var drink_ID = drink_response["drinks"][0]["idDrink"];
+                var drink_number = Math.floor((Math.random() * 20) + 1);
+                var drink = drink_response["drinks"][drink_number];
+                var drink_name = drink["strDrink"];
+                var drink_pic = drink["strDrinkThumb"];
+                var drink_ID = drink["idDrink"];
                 var intro = "" + movie + " is in the " + movie_genre.toLowerCase() + " genre. As such, it will pair nicely with a(n) ";
                 if("Genre not found" == movie_genre){
                     intro = "" + movie + " has no genre in the database. As such, it will pair nicely with a(n) ";
                 }
-                document.getElementById('lblDrink').innerHTML = intro + drink_type.toLowerCase().replace(/_/g,' ') + ". We suggest the " + drink + ". For details on how to prepare this drink please visit " + "this entry on The Cocktail DB".link("https://www.thecocktaildb.com/drink.php?c=" + drink_ID) + ".";
+                document.getElementById('lblDrink').innerHTML = intro + drink_type.toLowerCase().replace(/_/g,' ') + ". We suggest the " + drink_name + ". For details on how to prepare this drink please visit " + "this entry on The Cocktail DB".link("https://www.thecocktaildb.com/drink.php?c=" + drink_ID) + ".";
                 document.getElementById('img').src = "" + drink_pic;
             };
         </script>
