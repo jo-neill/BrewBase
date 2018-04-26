@@ -16,7 +16,80 @@
     </head>
 
     <body>
+        <div id="my-signin2"></div>
+        <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+        <script>
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyDO9wyRXwoy-hYSnzNrsSz91ca1gB5p0Qc",
+                authDomain: "ist411-1522363488845.firebaseapp.com",
+                databaseURL: "https://ist411-1522363488845.firebaseio.com/",
+                projectId: "ist411-1522363488845",
+                storageBucket: "ist411-1522363488845.appspot.com",
+                messagingSenderId: "379691979290"
+            };
+            firebase.initializeApp(config);
+            // Get a reference to the database service
+            var database = firebase.database();
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    
+                } else {
+                    function onSuccess(googleUser) {
+                        console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+                    }
+                    function onFailure(error) {
+                        console.log(error);
+                    }
+                    function renderButton() {
+                        gapi.signin2.render('my-signin2', {
+                            'scope': 'profile email',
+                            'width': 240,
+                            'height': 50,
+                            'longtitle': true,
+                            'theme': 'dark',
+                            'onsuccess': onSuccess,
+                            'onfailure': onFailure
+                        });
+                    }
 
+                    provider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithPopup(provider).then(function (result) {
+                        // This gives you a Google Access Token. You can use it to access the Google API.
+                        var token = result.credential.accessToken;
+                        // The signed-in user info.
+                        user = result.user;
+                    }).catch(function (error) {
+                        // Handle Errors here.
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        // The email of the user's account used.
+                        var email = error.email;
+                        // The firebase.auth.AuthCredential type that was used.
+                        var credential = error.credential;
+                    });
+                }
+            });// Login handling
+
+            // Post new entry to DB        
+            function writeNewPost() {
+                var movie = document.getElementById('movie').value;
+                var drink = document.getElementById('drink').value;
+                var rating = document.getElementById('rating').value;
+                // A post entry.
+                var postData = {
+                    "movie": movie,
+                    "drink": drink,
+                    "rating": rating
+                };
+
+                // Post the data
+                console.log("Ref = " + database.ref());
+                console.log("Data = " + postData);
+                var databaseRef = database.ref('users/user_uid');
+                databaseRef.set(postData);
+            }
+        </script>
         <div class="site-wrapper">
 
             <div class="site-wrapper-inner">
@@ -35,33 +108,33 @@
 
                     <div class="inner cover">
                         <h1 class="cover-heading">Add Data</h1>
-                        <form action="add-data" method="post">
+                        <form action="" id="add_data">
                             <div class="form-group">
-                              <label for="movie">Movie Title</label>
-                              <input type="text" class="form-control" id="movie" placeholder=""></input>
-                            </div>
-                             <div class="form-group">
-                              <label for="drink">Drink Name</label>
-                              <input type="text" class="form-control" id="drink" placeholder=""></input>
+                                <label for="movie">Movie Title</label>
+                                <input type="text" class="form-control" id="movie" placeholder=""></input>
                             </div>
                             <div class="form-group">
-                              <label for="rating">Experience Rating</label>
-                              <select class="form-control" id="rating">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                                <option>6</option>
-                                <option>7</option>
-                                <option>8</option>
-                                <option>9</option>
-                                <option>10</option>
-                              </select>
+                                <label for="drink">Drink Name</label>
+                                <input type="text" class="form-control" id="drink" placeholder=""></input>
                             </div>
-                            <button class="btn btn-success">Submit</button>
-                          </form>
-                          
+                            <div class="form-group">
+                                <label for="rating">Experience Rating</label>
+                                <select class="form-control" id="rating">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-success" id="save_form" onclick="writeNewPost(); console.log('clicked')">Submit</button>
+                        </form>
+
                     </div>
 
                     <div class="mastfoot">
@@ -75,5 +148,16 @@
             </div>
 
         </div>
+        <!-- Google sign-in-->
+        <script src="https://apis.google.com/js/platform.js?onload=renderButton"></script>
+        <!-- Firebase imports -->
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-firestore.js"></script>
+
+        <!-- Main FireBase script-->
+        <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
+
     </body>
 </html>
