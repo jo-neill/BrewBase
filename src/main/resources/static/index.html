@@ -17,6 +17,7 @@
     </head>
     <body>
         <div id="my-signin2"></div>
+        <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
         <script>
             // Initialize Firebase
             var config = {
@@ -28,6 +29,7 @@
                 messagingSenderId: "379691979290"
             };
             firebase.initializeApp(config);
+            var database = firebase.database();
             function onSuccess(googleUser) {
                 console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
             }
@@ -62,6 +64,34 @@
                 var credential = error.credential;
             });
         </script>
+        <script>
+            // Read all entries from database      
+            function userRecommendDrink() {
+                var movie = document.getElementById('movie').value;
+                var best_drink = "No entries for this movie";
+                var best_rating = 0;
+                return database.ref('/users/').once('value').then(
+                    function(snapshot) {
+                        var all_data = (snapshot.val()) || 'Anonymous';
+                        for(var i = 0; i < Object.keys(all_data).length; i++){
+                            var curr_posts = all_data[Object.keys(all_data)[i]];
+                            for(var j = 0; j < Object.keys(curr_posts).length; j++){                
+                                var curr_movie_name = curr_posts[Object.keys(curr_posts)[j]]["movie"];
+                                var curr_drink_name = curr_posts[Object.keys(curr_posts)[j]]["drink"];
+                                var curr_rating = curr_posts[Object.keys(curr_posts)[j]]["rating"];
+                                if(curr_movie_name == movie){
+                                    if(curr_rating > best_rating){
+                                        best_drink = curr_drink_name;
+                                        best_rating = curr_rating;
+                                    }
+                                }
+                            }
+                        }
+                        document.getElementById('lblUserDrink').innerHTML = "Based on our pool of user entries we would also recommend trying a(n) " + best_drink + " with this movie.";
+                    }
+                );
+            }
+        </script>    
         <script>
             function getSuggestions() {
                 // Gets the genre of the movie inputted by the user
@@ -184,7 +214,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Enter a movie here..." id="movie">
                             <span class="input-group-btn">
-                                <button class="btn btn-secondary" type="button" onClick="getSuggestions();">Go!</button>
+                                <button class="btn btn-secondary" type="button" onClick="userRecommendDrink();getSuggestions();">Go!</button>
                             </span>
                         </div>
                         <p class="lead"></p>
@@ -196,6 +226,9 @@
                         </p>
                         <p>
                             <label id="lblDrink"></label>
+                        </p>
+                        <p>
+                            <label id="lblUserDrink"></label>
                         </p>
                     </div>
 
